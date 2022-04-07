@@ -31,21 +31,18 @@ class CharCNN:
         x_input = tf.reshape(self.x_place, shape=[-1, 20, 20, 1])
         # re-arrange the image space to fit unknown samples for 20x20x1 image
 
-        # Convolution layer 1
         cw1 = tf.Variable(tf.random_normal(shape=[3, 3, 1, 32], stddev=0.01), dtype=tf.float32)
         cb1 = tf.Variable(tf.random_normal(shape=[32]), dtype=tf.float32)
         conv1 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(x_input, filter=cw1, strides=[1, 1, 1, 1], padding='SAME'), cb1))
         conv1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
         conv1 = tf.nn.dropout(conv1, self.keep_place)
 
-        # Convolution layer 2
         cw2 = tf.Variable(tf.random_normal(shape=[3, 3, 32, 64], stddev=0.01), dtype=tf.float32)
         cb2 = tf.Variable(tf.random_normal(shape=[64]), dtype=tf.float32)
         conv2 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(conv1, filter=cw2, strides=[1, 1, 1, 1], padding='SAME'), cb2))
         conv2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
         conv2 = tf.nn.dropout(conv2, self.keep_place)
 
-        # Convolution layer 3
         cw3 = tf.Variable(tf.random_normal(shape=[3, 3, 64, 128], stddev=0.01), dtype=tf.float32)
         cb3 = tf.Variable(tf.random_normal(shape=[128]), dtype=tf.float32)
         conv3 = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(conv2, filter=cw3, strides=[1, 1, 1, 1], padding='SAME'), cb3))
@@ -54,19 +51,16 @@ class CharCNN:
 
         conv_out = tf.reshape(conv3, shape=[-1, 3 * 3 * 128])  # initiate the output of the convolution
 
-        # initiate forward propagation 1
         fw1 = tf.Variable(tf.random_normal(shape=[3 * 3 * 128, 1024], stddev=0.01), dtype=tf.float32)
         fb1 = tf.Variable(tf.random_normal(shape=[1024]), dtype=tf.float32)
         fully1 = tf.nn.relu(tf.add(tf.matmul(conv_out, fw1), fb1))
         fully1 = tf.nn.dropout(fully1, self.keep_place)
 
-        # initiate forward propagation 2
         fw2 = tf.Variable(tf.random_normal(shape=[1024, 1024], stddev=0.01), dtype=tf.float32)
         fb2 = tf.Variable(tf.random_normal(shape=[1024]), dtype=tf.float32)
         fully2 = tf.nn.relu(tf.add(tf.matmul(fully1, fw2), fb2))
         fully2 = tf.nn.dropout(fully2, self.keep_place)
 
-        # initiate forward propagation 3
         fw3 = tf.Variable(tf.random_normal(shape=[1024, self.dataset_len], stddev=0.01), dtype=tf.float32)
         fb3 = tf.Variable(tf.random_normal(shape=[self.dataset_len]), dtype=tf.float32)
         fully3 = tf.add(tf.matmul(fully2, fw3), fb3, name='out_put')
@@ -212,7 +206,7 @@ if __name__ == '__main__':
     train_model_path = './carIdentityData/model/char_recongnize/model.ckpt'
     model_path = './carIdentityData/model/char_recongnize/model.ckpt-600'
 
-    train_flag = 1
+    train_flag = 0
     net = CharCNN()
 
     if train_flag == 0:
