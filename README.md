@@ -9,4 +9,4 @@ plateNeuralNet.py – the training module for identify the car plate image
 
 carIdentityData – the training dataset category
 
-Images – the identify module image category
+Images – the identification module image category
