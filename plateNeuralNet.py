@@ -1,5 +1,5 @@
 import os
-
+import sys
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     train_model_path = './carIdentityData/model/plate_recongnize/model.ckpt'
     model_path = './carIdentityData/model/plate_recongnize/model.ckpt-510'
 
-    train_flag = 1
+    train_flag = int(sys.argv[1])
     net = PlateCNN()
 
     if train_flag == 0:

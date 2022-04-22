@@ -1,5 +1,5 @@
 import os
-
+import sys
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -204,9 +204,9 @@ if __name__ == '__main__':
     data_dir = './carIdentityData/cnn_char_train'
     test_dir = './carIdentityData/cnn_char_test'
     train_model_path = './carIdentityData/model/char_recongnize/model.ckpt'
-    model_path = './carIdentityData/model/char_recongnize/model.ckpt-600'
+    model_path = './carIdentityData/model/char_recongnize/model.ckpt-520'
 
-    train_flag = 0
+    train_flag = int(sys.argv[1])
     net = CharCNN()
 
     if train_flag == 0:
