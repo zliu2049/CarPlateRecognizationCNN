@@ -5,6 +5,8 @@ import numpy as np
 # import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']= '2'
 
 char_table = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
               'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '川', '鄂', '赣', '甘', '贵',
@@ -291,16 +293,19 @@ def locate_carPlate(orig_img, pred_image):
             if not ret1:
                 continue
             car_plate1 = img_Transform(rotate_rect2, temp2_orig_img)  # transform image if there is an angel
-            car_plate1 = cv2.resize(car_plate1, (car_plate_w, car_plate_h))  # adjust image size for CNN recognition
+            if car_plate1.size > 0:
+                car_plate1 = cv2.resize(car_plate1, (car_plate_w, car_plate_h))  # adjust image size for CNN recognition
             # adjust area #
             # box = cv2.boxPoints(rotate_rect2)
-            box = cv2.boxPoints(rotate_rect2).astype(int)
-            for k in range(4):
-                n1, n2 = k % 4, (k + 1) % 4
-                cv2.line(temp1_orig_img, (box[n1][0], box[n1][1]), (box[n2][0], box[n2][1]), (255, 0, 0), 2)
+                box = cv2.boxPoints(rotate_rect2).astype(int)
+                for k in range(4):
+                    n1, n2 = k % 4, (k + 1) % 4
+                    cv2.line(temp1_orig_img, (box[n1][0], box[n1][1]), (box[n2][0], box[n2][1]), (255, 0, 0), 2)
             # cv2.imshow('opencv_' + str(i), car_plate1)
             # adjust area #
-            carPlate_list.append(car_plate1)
+                carPlate_list.append(car_plate1)
+            else:
+                print("car_plate1 -> === {} ===".format(car_plate1))
     # cv2.namedWindow("contour", 0)
     # cv2.resizeWindow("contour", 640, 480)
     # cv2.imshow('contour', temp1_orig_img)
@@ -488,25 +493,31 @@ if __name__ == '__main__':
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     car_plate_w, car_plate_h = 136, 36
     char_w, char_h = 20, 20
-    plate_model_path = './carIdentityData/model/plate_recongnize/model.ckpt-510.meta'
-    char_model_path = './carIdentityData/model/char_recongnize/model.ckpt-520.meta'
-    # img = cv2.imread('./images/pictures/1.jpg')
+    plate_model_path = './carIdentityData/model/plate_recongnize/model.ckpt-540.meta'
+    char_model_path = './carIdentityData/model/char_recongnize/model.ckpt-560.meta'
+    img = cv2.imread('./images/pictures/2.jpg')
+    imgpath= "./images/pictures/testimages/"
+    # img = cv2.imread('./images/pictures/gengreenimgs/56.jpg')
+    for parent, parent_folder, filenames in os.walk(imgpath):
+        for filename in filenames:
+            path = os.path.join(parent, filename)
+            print(path)
+            img = cv2.imread(path)
 
-    img = cv2.imread(f'./images/pictures/{sys.argv[1]}.jpg')
 
-    pred_img = pre_process(img)  # preprocessing
+            pred_img = pre_process(img)  # preprocessing
 
-    car_plate_list = locate_carPlate(img, pred_img)  # locating the car plate
+            car_plate_list = locate_carPlate(img, pred_img)  # locating the car plate
 
-    ret, car_plate = cnn_select_carPlate(car_plate_list, plate_model_path)  # car plate recognize
-    if not ret:
-        print("car plate not found!")
-        sys.exit(-1)
-    # cv2.imshow('cnn_plate', car_plate)
+            ret, car_plate = cnn_select_carPlate(car_plate_list, plate_model_path)  # car plate recognize
+            if not ret:
+                print("car plate not found!")
+                # sys.exit(-1)
+            # cv2.imshow('cnn_plate', car_plate)
+            else:
+                char_img_list = extract_char(car_plate)  # extract character
 
-    char_img_list = extract_char(car_plate)  # extract character
+                text = cnn_recognize_char(char_img_list, char_model_path)  # recognize car plate character
+                print(text)
 
-    text = cnn_recognize_char(char_img_list, char_model_path)  # recognize car plate character
-    print(text)
-
-    cv2.waitKey(0)
+                cv2.waitKey(0)
